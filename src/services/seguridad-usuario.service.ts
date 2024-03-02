@@ -71,6 +71,11 @@ export class SeguridadUsuarioService {
     return null
   }
 
+  /**
+   * Generación de JWT
+   * @param usuario información del usuario
+   * @returns token
+   */
   crearToken(usuario: Usuario): string {
     let datos = {
       name: `${usuario.primerNombre} ${usuario.segundoNombre} ${usuario.primerApellido} ${usuario.segundoApellido}`,

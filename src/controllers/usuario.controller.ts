@@ -192,6 +192,7 @@ export class UsuarioController {
       login.estadoToken = false
       this.repositorioLogin.create(login)
       //notificar al usuario via correo o sms
+      usuario.clave = ""
       return usuario
     }
     return new HttpErrors[401]("Credenciales incorrectas.")
@@ -219,10 +220,26 @@ export class UsuarioController {
       let token = this.servicioSeguridad.crearToken(usuario)
       if (usuario) {
         usuario.clave = "" //por seguridad para no mostrar la clave
-        return {
-          user: {
-            usuario
+        try {
+          await this.usuarioRepository.logins(usuario._id).patch({
+            estadoCodigo2fa: true,
+            token: token
           },
+            {estadoCodigo2fa: false})
+          /*let login = await this.repositorioLogin.findOne({
+            where: {
+              usuarioId: usuario._id,
+              estadoCodigo2fa: false
+            }
+          })
+          login!.estadoCodigo2fa = true
+          this.repositorioLogin.updateById(login?._id, login!)*/
+        } catch (error) {
+          console.log("No se ha almacenado el cambio del estado de token en la base de datos");
+
+        }
+        return {
+          user: usuario,
           token: token
         }
       }
