@@ -85,4 +85,10 @@ export class SeguridadUsuarioService {
     let token = jwt.sign(datos, ConfiguracionSeguridad.claveJWT);
     return token
   }
+
+  obtenerRolDesdeToken(tk: string): string {
+    let obj = jwt.verify(tk, ConfiguracionSeguridad.claveJWT)
+    return obj.role
+
+  }
 }
