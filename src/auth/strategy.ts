@@ -13,7 +13,7 @@ export class BasicAuthenticationStrategy implements AuthenticationStrategy {
     @service(SeguridadUsuarioService)
     private servicioSeguridad: SeguridadUsuarioService,
     @inject(AuthenticationBindings.METADATA)
-    private metadata: AuthenticationMetadata,
+    private metadata: AuthenticationMetadata[],
     @repository(RolMenuRepository)
     private repositorioRolMenu: RolMenuRepository
   ) { }
@@ -28,14 +28,21 @@ export class BasicAuthenticationStrategy implements AuthenticationStrategy {
     let token = parseBearerToken(request)
     if (token) {
       let idRol = this.servicioSeguridad.obtenerRolDesdeToken(token)
-      let idMenu: string = this.metadata.options![0]
-      let accion: string = this.metadata.options![1]
+      console.log("idRol: ", idRol);
+      let idMenu: string = this.metadata[0].options![0]
+      console.log("idMenu: ", idMenu);
+      let accion: string = this.metadata[0].options![1]
+      console.log("accion: ", accion);
+      console.log(this.metadata);
+
       let permiso = await this.repositorioRolMenu.findOne({
         where: {
           rolId: idRol,
           menuId: idMenu
         }
       })
+      console.log(permiso);
+
       let continuar: boolean = false
       if (permiso) {
         switch (accion) {
