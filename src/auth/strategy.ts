@@ -5,7 +5,7 @@ import {HttpErrors, Request} from '@loopback/rest';
 import {UserProfile} from '@loopback/security';
 import parseBearerToken from 'parse-bearer-token';
 import {RolMenuRepository} from '../repositories';
-import {SeguridadUsuarioService} from '../services';
+import {AuthService, SeguridadUsuarioService} from '../services';
 export class BasicAuthenticationStrategy implements AuthenticationStrategy {
   name: string = 'auth';
 
@@ -15,7 +15,9 @@ export class BasicAuthenticationStrategy implements AuthenticationStrategy {
     @inject(AuthenticationBindings.METADATA)
     private metadata: AuthenticationMetadata[],
     @repository(RolMenuRepository)
-    private repositorioRolMenu: RolMenuRepository
+    private repositorioRolMenu: RolMenuRepository,
+    @service(AuthService)
+    private servicioAuth: AuthService
   ) { }
 
 
@@ -30,53 +32,19 @@ export class BasicAuthenticationStrategy implements AuthenticationStrategy {
       let idRol = this.servicioSeguridad.obtenerRolDesdeToken(token)
       console.log("idRol: ", idRol);
       let idMenu: string = this.metadata[0].options![0]
-      console.log("idMenu: ", idMenu);
+      console.log("idMenu: ", idMenu,);
       let accion: string = this.metadata[0].options![1]
       console.log("accion: ", accion);
       console.log(this.metadata);
-
-      let permiso = await this.repositorioRolMenu.findOne({
-        where: {
-          rolId: idRol,
-          menuId: idMenu
-        }
-      })
-      console.log(permiso);
-
-      let continuar: boolean = false
-      if (permiso) {
-        switch (accion) {
-          case "guardar":
-            continuar = permiso.guardar
-            break;
-          case "editar":
-            continuar = permiso.editar
-            break;
-          case "eliminar":
-            continuar = permiso.eliminar
-            break;
-          case "listar":
-            continuar = permiso.listar
-            break;
-          case "descargar":
-            continuar = permiso.descargar
-            break;
-          default:
-            throw new HttpErrors[401]("No es posible ejecutar la acción porque no existe.")
-        }
-        if (continuar) {
-          let perfil: UserProfile = Object.assign({
-            permitido: "OK"
-          })
-          return perfil
-        } else {
-          return undefined
-        }
-      } else {
-        throw new HttpErrors[401]("No es posible ejecutar la acción por falta de permisos.")
+      try {
+        let respuesta = await this.servicioAuth.VerificarPermisoDeUsuarioPorRol(idRol, idMenu, accion)
+        return respuesta
+      } catch (e) {
+        throw e
       }
+
+
     }
     throw new HttpErrors[401]("No es posible ejecutar la acción por falta de un token.")
   }
-
 }

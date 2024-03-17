@@ -20,10 +20,11 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import {UserProfile} from '@loopback/security';
 import {ConfiguracionSeguridad} from '../config/seguridad.config';
-import {Credenciales, FactorDeAutenticacionPorCodigo, Login, Usuario} from '../models';
+import {Credenciales, FactorDeAutenticacionPorCodigo, Login, PermisosRolMenu, Usuario} from '../models';
 import {LoginRepository, UsuarioRepository} from '../repositories';
-import {SeguridadUsuarioService} from '../services';
+import {AuthService, SeguridadUsuarioService} from '../services';
 
 export class UsuarioController {
   constructor(
@@ -32,7 +33,9 @@ export class UsuarioController {
     @service(SeguridadUsuarioService)
     public servicioSeguridad: SeguridadUsuarioService,
     @repository(LoginRepository)
-    public repositorioLogin: LoginRepository
+    public repositorioLogin: LoginRepository,
+    @service(AuthService)
+    private servicioAuth: AuthService
   ) { }
 
   @post('/usuario')
@@ -250,5 +253,25 @@ export class UsuarioController {
       }
     }
     return new HttpErrors[401]("Codigo de 2fa inválido para el usuario definido.")
+  }
+
+  @post('/validar-permisos')
+  @response(200, {
+    description: "Validación de permisos de un usuario para lógica de negocio"
+  })
+  async validarPermisosDeUsuario(
+    @requestBody(
+      {
+        content: {
+          'aplicattion/json': {
+            schema: getModelSchemaRef(PermisosRolMenu)
+          }
+        }
+      }
+    )
+    datos: PermisosRolMenu
+  ): Promise<UserProfile | undefined> {
+    return this.servicioAuth.VerificarPermisoDeUsuarioPorRol(datos.idRol, datos.idMenu, datos.accion)
+
   }
 }
