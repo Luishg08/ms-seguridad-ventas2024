@@ -181,7 +181,7 @@ export class UsuarioController {
     @requestBody(
       {
         content: {
-          'aplicattion/json': {
+          'application/json': {
             schema: getModelSchemaRef(Credenciales)
           }
         }
@@ -215,7 +215,7 @@ export class UsuarioController {
     @requestBody(
       {
         content: {
-          'aplicattion/json': {
+          'application/json': {
             schema: getModelSchemaRef(FactorDeAutenticacionPorCodigo)
           }
         }
@@ -263,7 +263,7 @@ export class UsuarioController {
     @requestBody(
       {
         content: {
-          'aplicattion/json': {
+          'application/json': {
             schema: getModelSchemaRef(PermisosRolMenu)
           }
         }
