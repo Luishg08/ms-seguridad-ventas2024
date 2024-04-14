@@ -7,4 +7,5 @@ export namespace ConfiguracionSeguridad {
   export const guardarAccion = "guardar"
   export const descargarAccion = "descargar"
   export const MongodbConnectionString = process.env.CONNECTION_STRING_MONGODB;
+  export const RolUsuarioPublico = "661c0d0a9791eba7b4ff81a5"
 }
